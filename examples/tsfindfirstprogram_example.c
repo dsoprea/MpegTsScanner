@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <tsscanner/tsfindfirstprogram.h>
 
-void main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 
     if(argc < 2)
@@ -20,17 +20,8 @@ void main(int argc, char *argv[])
         return -2;
     }
 
-/*
-    printf("RESULT= (%d)\n", result);
+    dump_state_info(state);
 
-//    printf("Found PMT:\n");
-//    DisplayPMT(state.p_stream, state.p_pmt);
-
-    if(state.found == 0)
-        printf("PMT not found.\n");
-//    else
-//        DisplayPMT(state->p_stream, state->p_pmt);
-*/
     free_state(state);
 }
 

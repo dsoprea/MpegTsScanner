@@ -71,6 +71,9 @@ int scan_file(char *filename,
 {
     int next_option = 0;
 
+    // LIBDVBPSI likes to spit stuff out on STDERR. Squelch it.
+    freopen("/dev/null", "w", stderr);
+
     int i_fd = -1;
     int i_mtu = 1316; /* (7 * 188) = 1316 < 1500 network MTU */
 

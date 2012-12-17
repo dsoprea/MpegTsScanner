@@ -14,7 +14,7 @@ INSTALL_PATH=/usr/local/lib
 SRC_PATH=$(PWD)/tsscanner
 EXAMPLE_PATH=$(PWD)/examples
 OUTPUT_PATH=$(PWD)/build
-DVBPSI_LD_PATHPARAM=#-L/home/dustin/build/libdvbpsi-0.2.2/src/.libs
+DVBPSI_LD_PATHPARAM=#-L../../../build/libdvbpsi-0.2.2/src/.libs
 TSSCANNER_INC_PATHPARAM=-I$(PWD)/
 
 TSSCANNER_SO_FILENAME=libtsscanner.so
@@ -51,10 +51,10 @@ $(OUTPUT_PATH)/$(TSFINDFIRSTPROGRAM_SO_NAME): $(OUTPUT_PATH)/tsscanner.o $(OUTPU
 examples: $(EXAMPLE_PATH)/tsfindfirstprogram_example
 
 $(EXAMPLE_PATH)/tsfindfirstprogram_example.o: $(EXAMPLE_PATH)/tsfindfirstprogram_example.c
-	$(CC) -c $(TSSCANNER_INC_PATHPARAM) $(CFLAGS) -o $(EXAMPLE_PATH)/tsfindfirstprogram_example.o $(EXAMPLE_PATH)/tsfindfirstprogram_example.c
+	$(CC) -c -Wno-deprecated-declarations $(TSSCANNER_INC_PATHPARAM) $(CFLAGS) -o $(EXAMPLE_PATH)/tsfindfirstprogram_example.o $(EXAMPLE_PATH)/tsfindfirstprogram_example.c
 
 $(EXAMPLE_PATH)/tsfindfirstprogram_example: $(EXAMPLE_PATH)/tsfindfirstprogram_example.o
-	$(CC) -Wno-deprecated-declarations $(TSSCANNER_INC_PATHPARAM) $(CFLAGS) -Wl,-Bstatic -o $(EXAMPLE_PATH)/findfirstprogram_example $(EXAMPLE_PATH)/tsfindfirstprogram_example.o -Wl,-Bdynamic -lm $(DVBPSI_LD_PATHPARAM) -ldvbpsi -ltsscanner -ltsfindfirstprogram
+	$(CC) $(TSSCANNER_INC_PATHPARAM) $(CFLAGS) -Wl,-Bstatic -o $(EXAMPLE_PATH)/findfirstprogram_example $(EXAMPLE_PATH)/tsfindfirstprogram_example.o -Wl,-Bdynamic -lm $(DVBPSI_LD_PATHPARAM) -ldvbpsi -ltsscanner -ltsfindfirstprogram
 
 install:
 	cp $(OUTPUT_PATH)/$(TSSCANNER_SO_NAME) $(INSTALL_PATH)

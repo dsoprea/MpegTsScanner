@@ -99,11 +99,13 @@ typedef struct
     uint16_t pmt_program_number;
     uint8_t  pmt_version;
     uint16_t pmt_pcr_pid;
+
     descriptor_t *pmt_descriptor;
     descriptor_es_t *pmt_es_descriptor;
 } scan_state_t;
 
 extern scan_state_t *find_first_program(const char *filename);
+extern void dump_state_info(scan_state_t *state);
 
 #endif
 

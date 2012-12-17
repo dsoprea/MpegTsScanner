@@ -292,13 +292,186 @@ static int continuation_call(void *state_)
     return (state->found == 0 ? 0 : 1);
 }
 
+static void dump_supplemental_type_info(descriptor_type_t type, descriptor_info_t info, const char *indent)
+{
+    unsigned char i;
+
+    printf("\n");
+
+    switch(type)
+    {
+        case max_bitrate:
+        
+            printf("%s('max_bitrate' descriptor info)\n\n", indent);
+            printf("%si_max_bitrate: %u\n",                 indent, info.max_bitrate.i_max_bitrate);
+        
+            break;
+
+        case system_clock:
+        
+            printf("%s('system_clock' descriptor info)\n\n", indent);
+            printf("%s     b_external_clock_ref: %d\n",           indent, info.system_clock.b_external_clock_ref);
+            printf("%s i_clock_accuracy_integer: %u\n",       indent, info.system_clock.i_clock_accuracy_integer);
+            printf("%si_clock_accuracy_exponent: %u\n",      indent, info.system_clock.i_clock_accuracy_exponent);
+            
+            break;
+
+        case stream_identifier:
+        
+            printf("%s('stream_identifier' descriptor info)\n\n", indent);
+            printf("%si_component_tag: %u\n",                     indent, info.stream_identifier.i_component_tag);
+            
+            break;
+        
+        case subtitle:
+        
+            printf("%s('subtitle' descriptor info)\n\n", indent);
+            printf("%scount: %u\n",                      indent, info.subtitle.count);
+            
+            if(info.subtitle.count)
+            {
+                printf("\n");
+
+                i = 0;                
+                while(i < info.subtitle.count)
+                {
+                    printf("%si_iso6392_language_code: %u, %u, %u\n", 
+                            indent, 
+                            info.subtitle.subtitles[i].i_iso6392_language_code[0], 
+                            info.subtitle.subtitles[i].i_iso6392_language_code[1], 
+                            info.subtitle.subtitles[i].i_iso6392_language_code[2]);
+                    
+                    printf("%s      i_subtitling_type: %u\n", indent, info.subtitle.subtitles[i].i_subtitling_type);
+                    printf("%s  i_composition_page_id: %u\n", indent, info.subtitle.subtitles[i].i_composition_page_id);
+                    printf("%s    i_ancillary_page_id: %u\n", indent, info.subtitle.subtitles[i].i_ancillary_page_id);
+
+                    printf("\n");
+                    
+                    i++;
+                }
+            }
+            
+            break;
+
+        case unknown:
+
+            printf("%s('unknown' descriptor info)\n\n", indent);
+            printf("%s  data: %s\n",                      indent, info.unknown.data);
+            printf("%slength: %u\n",                    indent, info.unknown.length);
+
+            break;
+            
+        default:
+        
+            printf("%s(invalid descriptor type (%u))\n\n", indent, type);
+    }
+}
+
+static void dump_descriptors(descriptor_t *current, const char* indent)
+{
+    const char *indent_proper = (indent ? indent : "");
+
+    unsigned char i = 0;
+    while(current)
+    {
+        printf("%s%u\n",               indent_proper, i);
+        printf("%s---\n",              indent_proper);
+        printf("%s       i_tag: %u\n", indent_proper, current->i_tag); // Library's type.
+        printf("%stype (local): %u\n", indent_proper, current->type);  // Our type.
+
+        dump_supplemental_type_info(current->type, current->info, indent);
+    
+        printf("\n");
+    
+        current = current->next;
+        i++;
+    }
+}
+
+void dump_state_info(scan_state_t *state)
+{
+    const char *indent = "  ";
+
+    if(state->found == 0)
+    {
+        printf("No PMT packets were found.\n\n");
+        return;
+    }
+
+    printf("General\n");
+    printf("=======\n");
+
+    printf("Program number: %u\n", state->pmt_program_number);
+    printf("       Version: %u\n", state->pmt_version);
+    printf("       PCR PID: %u\n", state->pmt_pcr_pid);
+    
+    printf("\n");
+    
+    descriptor_t *current = state->pmt_descriptor;
+    
+    if(current)
+    {
+        printf("Descriptors (Regular)\n");
+        printf("=====================\n");
+        printf("\n");
+
+        dump_descriptors(current, "");
+    }
+
+/*
+struct descriptor_es_s
+{
+    uint8_t i_type;
+    char *type_name;
+    uint16_t i_pid;
+
+    descriptor_t *next_child;
+    descriptor_es_t *next_sibling;
+};
+
+*/
+
+    descriptor_es_t *es_current = state->pmt_es_descriptor;
+
+    if(es_current)
+    {
+        printf("Descriptors (ES)\n");
+        printf("================\n");
+        printf("\n");
+
+        while(es_current)
+        {
+            printf("%s(New ES section)\n", indent);
+            printf("\n");
+
+            printf("%s   i_type: %u\n", indent, es_current->i_type);
+            printf("%stype_name: %s\n", indent, es_current->type_name);
+            printf("%s    i_pid: %u\n", indent, es_current->i_pid);
+
+            printf("\n");
+
+            if(es_current->next_child)
+            {
+                printf("%sDescriptors (Regular)\n", indent);
+                printf("%s=====================\n", indent);
+
+                dump_descriptors(es_current->next_child, indent);
+
+                printf("\n");
+            }
+
+            es_current = es_current->next_sibling;
+        }
+    }
+}
+
 scan_state_t *find_first_program(const char *filename)
 {
     int result;
     scan_state_t *state = (scan_state_t *)malloc(sizeof(scan_state_t));
     memset(state, 0, sizeof(scan_state_t));
 
-    result = scan_file(filename,
+    result = scan_file((char *)filename,
                        pre_call, 
                        post_call,
                        continuation_call,
