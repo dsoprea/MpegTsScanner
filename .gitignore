@@ -1,3 +1,9 @@
 build/*
 examples/*.o
 examples/*_example
+
+autom4te.cache
+config.log
+config.status
+Makefile
+
