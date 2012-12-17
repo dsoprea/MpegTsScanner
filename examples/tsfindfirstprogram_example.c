@@ -23,5 +23,7 @@ int main(int argc, char *argv[])
     dump_state_info(state);
 
     free_state(state);
+    
+    return 0;
 }
 

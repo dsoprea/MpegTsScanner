@@ -32,13 +32,18 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <math.h>
 #include <inttypes.h>
+
+#include <dvbpsi/descriptor.h>
 #include <dvbpsi/dvbpsi.h>
+#include <dvbpsi/pat.h>
+#include <dvbpsi/pmt.h>
 
 #include "tsscanner.h"
 
@@ -69,19 +74,19 @@ int scan_file(char *filename,
               continuation_check_callback_t continuation_callback, 
               void *state)
 {
-    int next_option = 0;
+//    int next_option = 0;
 
     // LIBDVBPSI likes to spit stuff out on STDERR. Squelch it.
     freopen("/dev/null", "w", stderr);
 
     int i_fd = -1;
-    int i_mtu = 1316; /* (7 * 188) = 1316 < 1500 network MTU */
+//    int i_mtu = 1316; /* (7 * 188) = 1316 < 1500 network MTU */
 
-    mtime_t  time_prev = 0;
-    mtime_t  time_base = 0;
+//    mtime_t  time_prev = 0;
+//    mtime_t  time_base = 0;
 
-    mtime_t  i_prev_pcr = 0;  /* 33 bits */
-    int      i_old_cc = -1;
+//    mtime_t  i_prev_pcr = 0;  /* 33 bits */
+//    int      i_old_cc = -1;
     uint32_t i_bytes = 0; /* bytes transmitted between PCR's */
 
     uint8_t *p_data = NULL;
@@ -119,7 +124,7 @@ int scan_file(char *filename,
             break;
     
         int i = 0;
-        vlc_bool_t b_first = VLC_FALSE;
+//        vlc_bool_t b_first = VLC_FALSE;
 
         i_bytes += i_len;
         for( i = 0; i < i_len; i += 188 )
@@ -130,7 +135,7 @@ int scan_file(char *filename,
             vlc_bool_t b_adaptation = (p_tmp[3] & 0x20); /* adaptation field */
             vlc_bool_t b_discontinuity_seen = VLC_FALSE;
 
-            long int pos = lseek(i_fd, 0, 1);
+//            long int pos = lseek(i_fd, 0, 1);
 
             if( i_pid == 0x0 )
                 dvbpsi_PushPacket(p_stream->pat.handle, p_tmp);
@@ -142,7 +147,7 @@ int scan_file(char *filename,
             if( !p_stream->pid[i_pid].b_seen )
             {
                 p_stream->pid[i_pid].b_seen = VLC_TRUE;
-                i_old_cc = i_cc;
+//                i_old_cc = i_cc;
                 p_stream->pid[i_pid].i_cc = i_cc;
             }
             else
@@ -154,7 +159,7 @@ int scan_file(char *filename,
                 b_discontinuity_seen = ( i_diff != 0 );
 
                 /* Update CC */
-                i_old_cc = p_stream->pid[i_pid].i_cc;
+//                i_old_cc = p_stream->pid[i_pid].i_cc;
                 p_stream->pid[i_pid].i_cc = i_cc;
             }
 
@@ -162,8 +167,8 @@ int scan_file(char *filename,
              * according to ISO/IEC 13818-1: DIS pages 20-22 */
             if( b_adaptation )
             {
-                vlc_bool_t b_discontinuity_indicator = (p_tmp[5]&0x80);
-                vlc_bool_t b_random_access_indicator = (p_tmp[5]&0x40);
+//                vlc_bool_t b_discontinuity_indicator = (p_tmp[5]&0x80);
+//                vlc_bool_t b_random_access_indicator = (p_tmp[5]&0x40);
                 vlc_bool_t b_pcr = (p_tmp[5]&0x10);  /* PCR flag */
 
 //                if( b_discontinuity_indicator )
@@ -181,7 +186,7 @@ int scan_file(char *filename,
                               ( (mtime_t)p_tmp[8] << 9 ) |
                               ( (mtime_t)p_tmp[9] << 1 ) |
                               ( (mtime_t)p_tmp[10] >> 7 ) ) / 90;
-                    i_prev_pcr = p_stream->pid[i_pid].i_pcr;
+//                    i_prev_pcr = p_stream->pid[i_pid].i_pcr;
                     p_stream->pid[i_pid].i_pcr = i_pcr;
 
                     i_bytes = 0; /* reset byte counter */

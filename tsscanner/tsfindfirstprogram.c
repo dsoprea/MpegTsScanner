@@ -78,7 +78,7 @@ static char *get_type_name(uint8_t type)
 
 static int set_descriptor_primitive(dvbpsi_descriptor_t* p_descriptor, descriptor_t *descriptor)
 {
-    int a;
+    int a, i;
 
     dvbpsi_system_clock_dr_t *p_clock_descriptor;
     dvbpsi_max_bitrate_dr_t *bitrate_descriptor;
@@ -146,8 +146,15 @@ static int set_descriptor_primitive(dvbpsi_descriptor_t* p_descriptor, descripto
         default:
 
             descriptor->type = unknown;
-
-            descriptor->info.unknown.data   = strndup(p_descriptor->p_data, p_descriptor->i_length);
+            descriptor->info.unknown.data = (uint8_t *)malloc(p_descriptor->i_length);
+            
+            i = 0;
+            while(i < p_descriptor->i_length)
+            {
+                descriptor->info.unknown.data[i] = p_descriptor->p_data[i];
+                i++;
+            }
+            
             descriptor->info.unknown.length = p_descriptor->i_length;
     }
     
@@ -295,6 +302,7 @@ static int continuation_call(void *state_)
 static void dump_supplemental_type_info(descriptor_type_t type, descriptor_info_t info, const char *indent)
 {
     unsigned char i;
+    char *temp;
 
     printf("\n");
 
@@ -341,9 +349,17 @@ static void dump_supplemental_type_info(descriptor_type_t type, descriptor_info_
                             info.subtitle.subtitles[i].i_iso6392_language_code[1], 
                             info.subtitle.subtitles[i].i_iso6392_language_code[2]);
                     
-                    printf("%s      i_subtitling_type: %u\n", indent, info.subtitle.subtitles[i].i_subtitling_type);
-                    printf("%s  i_composition_page_id: %u\n", indent, info.subtitle.subtitles[i].i_composition_page_id);
-                    printf("%s    i_ancillary_page_id: %u\n", indent, info.subtitle.subtitles[i].i_ancillary_page_id);
+                    printf("%s      i_subtitling_type: %u\n", 
+                            indent, 
+                            info.subtitle.subtitles[i].i_subtitling_type);
+
+                    printf("%s  i_composition_page_id: %u\n", 
+                            indent, 
+                            info.subtitle.subtitles[i].i_composition_page_id);
+
+                    printf("%s    i_ancillary_page_id: %u\n", 
+                            indent, 
+                            info.subtitle.subtitles[i].i_ancillary_page_id);
 
                     printf("\n");
                     
@@ -355,9 +371,13 @@ static void dump_supplemental_type_info(descriptor_type_t type, descriptor_info_
 
         case unknown:
 
+            temp = strndup((char *)info.unknown.data, info.unknown.length);
+
             printf("%s('unknown' descriptor info)\n\n", indent);
-            printf("%s  data: %s\n",                      indent, info.unknown.data);
+            printf("%s  data: %s\n",                    indent, temp);
             printf("%slength: %u\n",                    indent, info.unknown.length);
+
+            free(temp);
 
             break;
             
@@ -417,19 +437,6 @@ void dump_state_info(scan_state_t *state)
 
         dump_descriptors(current, "");
     }
-
-/*
-struct descriptor_es_s
-{
-    uint8_t i_type;
-    char *type_name;
-    uint16_t i_pid;
-
-    descriptor_t *next_child;
-    descriptor_es_t *next_sibling;
-};
-
-*/
 
     descriptor_es_t *es_current = state->pmt_es_descriptor;
 

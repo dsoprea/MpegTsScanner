@@ -42,7 +42,7 @@ typedef struct
 
 typedef struct
 {
-    char *data;
+    uint8_t *data;
     unsigned char length;
 } unknown_descriptor_t;
 
@@ -104,6 +104,7 @@ typedef struct
     descriptor_es_t *pmt_es_descriptor;
 } scan_state_t;
 
+extern void free_state(scan_state_t *state);
 extern scan_state_t *find_first_program(const char *filename);
 extern void dump_state_info(scan_state_t *state);
 

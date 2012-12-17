@@ -62,5 +62,8 @@ install:
 	ln -s $(INSTALL_PATH)/$(TSFINDFIRSTPROGRAM_SO_NAME) $(INSTALL_PATH)/$(TSFINDFIRSTPROGRAM_SO_FILENAME).$(VERSION)
 
 clean:
-	rm -fr examples/*_example examples/*_example.o build/* $(INSTALL_PATH)/$(TSSCANNER_SO_FILENAME)* $(INSTALL_PATH)/$(TSFINDFIRSTPROGRAM_SO_FILENAME)* Makefile *.cache config.*
+	rm -fr examples/*_example examples/*_example.o build/* $(INSTALL_PATH)/$(TSSCANNER_SO_FILENAME)* $(INSTALL_PATH)/$(TSFINDFIRSTPROGRAM_SO_FILENAME)* *.cache config.*
+
+distclean: clean
+	rm -fr Makefile
 
