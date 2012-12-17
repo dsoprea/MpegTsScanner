@@ -1,0 +1,5 @@
+This project is licensed under LGPL, as the the "libdvbpsi" project is LGPL.
+You must verify the license of the version of "libdvbpsi" that you're using, as
+it was originally GPL. You will not be able to use early, GPL, versions of 
+"libdvbpsi" with any proprietary projects.
+
