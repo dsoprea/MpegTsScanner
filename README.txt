@@ -18,6 +18,7 @@ Building
 
 Execute the following from the project root.
 
+  ./configure
   make
 
   As admin:
