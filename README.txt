@@ -4,8 +4,8 @@ MpegTsScanner
 Scan packets from a MPEG-TS file. One library (tsscanner) provides the basic 
 functionality to process through a MPEG-TS file. The other library 
 (tsfindfirstprogram) provides functionality to grab information on the first 
-program found. This latter functionality is useful for getting information for 
-from a single-program video, such as that recorded from a ATSC/DVB television 
+program found. This latter functionality is useful for getting information from
+a single-program video, such as that recorded from an ATSC/DVB television 
 tuner.
 
 Requirements
